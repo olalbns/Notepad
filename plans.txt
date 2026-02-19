@@ -1,0 +1,8 @@
+
+Fonction du site:
+
+*Créé des note qui sont dans des dossier
+*Créé des dossiers
+*Créé des note concernant une date sur le calandrier
+*Voir le calendrier
+*Créé des rappels

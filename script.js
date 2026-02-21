@@ -13,6 +13,7 @@ var sec_para = document.getElementById("Sec-para");
 var sec_folders = document.getElementById("Sec-folders");
 var folderInfo = document.getElementById("folder-info");
 var noteTextarea = document.getElementById("noteTextarea");
+const folderContainer = document.getElementById("folders-container");
 
 function affiErreurPage() {
     if (location.pathname !== "/Notepad+/" && location.pathname !== "/Notepad+/index.php" && location.pathname !== "/Notepad+/home" && location.pathname !== "/Notepad+/parametre" && location.pathname !== "/Notepad+/categorie" && location.pathname !== "/Notepad+/programme" && location.pathname !== "/Notepad+/Mes_notes") {
@@ -71,6 +72,7 @@ function affiNote() {
     document.getElementById("Para").className = "sidelink";
     document.getElementById("Sec-folder").style.display = "block";
     sec_folders.style.display = "block";
+    folderContainer.style.display = "flex";
     document.getElementById("Sec-OpenNote").setAttribute("hidden", true);
     document.getElementById("sec-erreur").style.display = "none";
     // Masquer la preview
@@ -262,47 +264,74 @@ function updateResponsiveLayout() {
     const width = window.innerWidth;
     const sidebar = document.getElementById("sidebar");
     const dashContent = document.getElementById("dashcontent");
-    
+
     if (!sidebar || !dashContent) return;
-    
-    // Appliquer les calculs uniquement si l'écran est >= 767px
+
+    // Appliquer les calculs si l'écran est <= 768px (mobile)
     if (width <= 768) {
         const height = width - 1;
         const bottomOffset = height * 0.411;
         const leftOffset = height * 0.582;
         const marginTop = (height * 0.0845) + 'px';
-        
+
         // Mise à jour du sidebar avec cssText (plus efficace)
         sidebar.style.cssText = `
             height: ${height}px;
             left: ${leftOffset}px;
             bottom: -${bottomOffset}px;
         `;
-        
+
         // Mise à jour du contenu principal
         dashContent.style.height = window.innerHeight + 'px';
-        
+
         // Mise à jour des marges des boutons en une seule boucle
         [btn_dash, btn_notes, btn_prog, btn_cate, btn_para].forEach(btn => {
             if (btn) btn.style.marginTop = marginTop;
         });
+
     } else {
-        // Sur mobile (< 767px), utiliser les valeurs par défaut / auto
+        // Sur desktop (> 768px), utiliser les valeurs par défaut / auto
         sidebar.style.cssText = `
-            height: auto;
+            height: 100vh;
             left: auto;
             bottom: auto;
         `;
-        
-        dashContent.style.height = 'auto';
-        
+
+        dashContent.style.height = '100vh';
+
         [btn_dash, btn_notes, btn_prog, btn_cate, btn_para].forEach(btn => {
             if (btn) btn.style.marginTop = 'auto';
         });
     }
-    
+
     localStorage.setItem("currentWidth", width);
 }
+
+// Ajouter les event listeners une seule fois au chargement
+document.addEventListener("DOMContentLoaded", () => {
+    const searchBar = document.getElementById("searchBar");
+    const searchBtn = document.getElementById("search-btn");
+    const searchInput = document.getElementById("search");
+
+    if (searchBtn && searchBar) {
+        searchBtn.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                // Sur mobile : afficher/masquer la barre
+                if (searchInput.style.display === 'block') {
+                    searchInput.style.display = 'none';
+                } else {
+                    searchInput.style.display = 'block';
+                }
+            } else {
+                // Sur desktop : soumettre le formulaire
+                searchBar.requestSubmit();
+                alert("La fonction de recherche n'est pas encore implémentée.");
+            }
+        });
+    }
+
+    updateResponsiveLayout();
+});
 
 // Initialiser au chargement
 document.addEventListener("DOMContentLoaded", updateResponsiveLayout);
@@ -562,6 +591,7 @@ function openFolder(folderId) {
     document.getElementById("Sec-folders").removeAttribute("hidden");
     document.getElementById("Sec-folder").style.backgroundColor = "white";
     folderInfo.removeAttribute("hidden");
+    document.getElementById("Sec-searchResult").setAttribute("hidden", "");
     document.getElementById("folders-container").style.display = "none";
     if (location.pathname !== "/Notepad+/" || location.pathname !== "/Notepad+/index.php" && location.pathname !== "/Notepad+/parametre" && location.pathname !== "/Notepad+/categorie" && location.pathname !== "/Notepad+/programme" && location.pathname !== "/Notepad+/Mes_notes") {
         console.log(uri);
@@ -635,7 +665,7 @@ function openFolder(folderId) {
                     }
                 });
             });
-            
+
             // Appeler clickNote pour gérer les cliques sur les notes
             clickNote();
 
@@ -908,7 +938,7 @@ function updade_folder() {
 
     // Use the visible strong containing the folder name
     const el = document.querySelector("#" + id_folder[0] + " .folder-name .folder_real_name");
-    const folder_name =  el.textContent.trim();
+    const folder_name = el.textContent.trim();
     document.getElementById("RefolderTitle").value = folder_name;
     // Show the update modal
     document.getElementById("updateFolderModal").removeAttribute("hidden");
@@ -1277,15 +1307,15 @@ function saveEditorContent() {
  */
 function clickNote() {
     const notes = document.querySelectorAll(".histori-conteza");
-    
+
     notes.forEach(noteElement => {
         // Rendre l'élément focusable
         noteElement.setAttribute("tabindex", "0");
-        
+
         noteElement.addEventListener("focus", (event) => {
             const noteId = noteElement.id;
             console.log('clickNote: clicked ->', noteId);
-            
+
             // Marquer comme actif
             if (!document.querySelector(".NoteActive")) {
                 noteElement.classList.add("NoteActive");
@@ -1294,7 +1324,7 @@ function clickNote() {
                 DeselectAllNotes();
                 noteElement.style.backgroundColor = "rgba(0, 0, 0, 0.13)";
             }
-            
+
             // Gestion de la multi-sélection avec Ctrl
             if (event.ctrlKey) {
                 let clicked = JSON.parse(localStorage.getItem("clickedNotes")) || [];
@@ -1306,7 +1336,7 @@ function clickNote() {
                 localStorage.setItem("clickedNotes", JSON.stringify([noteId]));
             }
         });
-        
+
         // Permettre les focus par clic
         noteElement.addEventListener("click", () => {
             noteElement.focus();
@@ -1335,7 +1365,7 @@ function copyNotes() {
         alert("Veuillez sélectionner au moins une note à copier");
         return;
     }
-    
+
     localStorage.setItem("copiedNotes", JSON.stringify(clickedNotes));
     localStorage.removeItem("cutNotes");
     alert(`${clickedNotes.length} note(s) copiée(s)`);
@@ -1350,7 +1380,7 @@ function cutNotes() {
         alert("Veuillez sélectionner au moins une note à couper");
         return;
     }
-    
+
     localStorage.setItem("cutNotes", JSON.stringify(clickedNotes));
     localStorage.removeItem("copiedNotes");
     alert(`${clickedNotes.length} note(s) coupée(s)`);
@@ -1365,17 +1395,17 @@ function pasteNotes() {
         alert("Veuillez ouvrir un dossier d'abord");
         return;
     }
-    
+
     const copiedNotes = JSON.parse(localStorage.getItem("copiedNotes")) || [];
     const cutNotes = JSON.parse(localStorage.getItem("cutNotes")) || [];
     const isCut = cutNotes.length > 0;
     const notesToPaste = isCut ? cutNotes : copiedNotes;
-    
+
     if (notesToPaste.length === 0) {
         alert("Aucune note à coller. Veuillez d'abord copier ou couper des notes");
         return;
     }
-    
+
     // Envoyer les notes au serveur
     fetch("api/paste_notes.php", {
         method: "POST",
@@ -1392,13 +1422,13 @@ function pasteNotes() {
         .then(data => {
             if (data.success) {
                 alert(`${notesToPaste.length} note(s) collée(s) avec succès`);
-                
+
                 // Nettoyer le presse-papiers
                 if (isCut) {
                     localStorage.removeItem("cutNotes");
                 }
                 localStorage.removeItem("clickedNotes");
-                
+
                 // Recharger le dossier
                 openFolder(currentFolderId);
             } else {
@@ -1418,12 +1448,12 @@ function pasteNotes() {
 function showDeleteConfirmationModal(type, itemName) {
     const modal = document.getElementById("deleteConfirmationModal");
     const messageElement = document.getElementById("deleteMessage");
-    
+
     messageElement.innerHTML = `Êtes-vous sûr de vouloir supprimer <strong>${itemName}</strong> ?<br>Cette action est irréversible.`;
-    
+
     // Stocker le type de suppression dans le data attribute
     modal.setAttribute("data-delete-type", type);
-    
+
     modal.removeAttribute("hidden");
     modal.style.display = "flex";
 }
@@ -1445,7 +1475,7 @@ function deleteElement() {
             const folderElement = document.getElementById(selectedFolder[0]);
             const folderName = folderElement.querySelector(".folderStrong_name")?.textContent || "Dossier";
             showDeleteConfirmationModal("folder", folderName);
-            
+
             // Stocker l'ID du dossier à supprimer
             localStorage.setItem("itemToDelete", selectedFolder[0]);
         }
@@ -1457,65 +1487,242 @@ function confirmDelete() {
     const modal = document.getElementById("deleteConfirmationModal");
     const deleteType = modal.getAttribute("data-delete-type");
     const itemId = localStorage.getItem("itemToDelete");
-    
+
     if (deleteType === "folder") {
         deleteFolder(itemId);
     } else if (deleteType === "note") {
         deleteNote(itemId);
     }
-    
+
     closeDeleteConfirmationModal();
     localStorage.removeItem("itemToDelete");
 }
 
 function deleteFolder(folderId) {
-    var donne = {request: "delete_folder", id: folderId};
-    
+    var donne = { request: "delete_folder", id: folderId };
+
     fetch('api/delete_all.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(donne)
     })
-    .then(r => r.json())
-    .then(resp => {
-        if (resp && resp.success) {
-            alert("Dossier supprimé avec succès");
-            document.location.href = "Mes_notes/";
-        } else {
-            alert("Erreur: " + resp.message);
-        }
-    })
-    .catch(err => {
-        console.error('Delete error', err);
-        alert('Erreur lors de la suppression du dossier');
-    });
+        .then(r => r.json())
+        .then(resp => {
+            if (resp && resp.success) {
+                alert("Dossier supprimé avec succès");
+                document.location.href = "Mes_notes/";
+            } else {
+                alert("Erreur: " + resp.message);
+            }
+        })
+        .catch(err => {
+            console.error('Delete error', err);
+            alert('Erreur lors de la suppression du dossier');
+        });
 }
 
 function deleteNote(noteId) {
-    var donne = {request: "delete_note", id: noteId};
-    
+    var donne = { request: "delete_note", id: noteId };
+
     fetch('api/delete_all.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(donne)
     })
-    .then(r => r.json())
-    .then(resp => {
-        if (resp && resp.success) {
-            alert("Note supprimée avec succès");
-            openFolder(localStorage.getItem("current_folder"));
-        } else {
-            alert("Erreur: " + resp.message);
-        }
-    })
-    .catch(err => {
-        console.error('Delete error', err);
-        alert('Erreur lors de la suppression de la note');
-    });
+        .then(r => r.json())
+        .then(resp => {
+            if (resp && resp.success) {
+                alert("Note supprimée avec succès");
+                openFolder(localStorage.getItem("current_folder"));
+            } else {
+                alert("Erreur: " + resp.message);
+            }
+        })
+        .catch(err => {
+            console.error('Delete error', err);
+            alert('Erreur lors de la suppression de la note');
+        });
 }
 
+//Focntion de gestion de la recherche
+// Fonction de gestion de la recherche
+function searchAll() {
+    const query = document.getElementById("search");
+    query.addEventListener("input", () => {
+        const searchTerm = query.value.trim().toLowerCase();
+        const sec_search = document.getElementById("Sec-searchResult");
+        const search_container = document.querySelector(".research-container");
+        
+        // Mettre à jour la query affichée
+        document.getElementById("research-query").textContent = JSON.stringify(searchTerm);
 
+        // Si le champ est vide, revenir à l'état précédent
+        if (searchTerm === "") {
+            // Masquer les résultats de recherche
+            sec_search.setAttribute("hidden", "");
+            
+            // Réafficher la section Notes avec ses sous-éléments
+            sec_notes.style.display = "block";
+            document.getElementById("Sec-folders").removeAttribute("hidden");
+            document.getElementById("Sec-folder").removeAttribute("hidden");
+            document.getElementById("Sec-folder").style.backgroundColor = "transparent";
+            folderContainer.style.display = "flex";
+            folderInfo.setAttribute("hidden", "")
+            sec_search.style.display = "none";
+            
+            // Masquer les autres sections
+            sec_dash.style.display = "none"
+            sec_prog.style.display = "none"
+            sec_cate.style.display = "none"
+            sec_para.style.display = "none"
+            document.getElementById("sec-erreur").style.display = "none";
+            
+            // Mettre à jour l'URL
+            history.replaceState(null, null, 'Mes_notes');
+            return;
+        }
 
+        // Configuration pour afficher la recherche
+        folderContainer.style.display = "none";
+        sec_search.removeAttribute("hidden");
+        sec_search.style.display = "block";
+
+        // Masquer TOUTES les autres sections
+        sec_dash.style.display = "none";
+        sec_dash.setAttribute("hidden", "");
+        
+        sec_notes.style.display = "block"; // Garder la section notes active
+        
+        sec_prog.style.display = "none";
+        sec_prog.setAttribute("hidden", "");
+        
+        sec_cate.style.display = "none";
+        sec_cate.setAttribute("hidden", "");
+        
+        sec_para.style.display = "none";
+        sec_para.setAttribute("hidden", "");
+        
+        document.getElementById("sec-erreur").style.display = "none";
+        document.getElementById("sec-erreur").setAttribute("hidden", "");
+        
+        document.getElementById("Sec-folders").setAttribute("hidden", "");
+        document.getElementById("Sec-folders").style.display = "none";
+        
+        document.getElementById("Sec-folder").setAttribute("hidden", "");
+        document.getElementById("Sec-folder").style.display = "none";
+        
+        folderInfo.setAttribute("hidden", "");
+        folderInfo.style.display = "none";
+
+        // Mettre à jour l'URL sans recharger
+        history.replaceState(null, null, `Mes_notes/search/${encodeURIComponent(searchTerm)}`);
+
+        // Effectuer la recherche
+        fetch(`api/search.php?query=${searchTerm}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success !== false && data.data.notes) {
+                    search_container.innerHTML = "";
+                    search_container.innerHTML = "<h3>Notes trouvées:</h3>";
+                    
+                    if (data.data.notes.length <= 0) {
+                        search_container.innerHTML += `
+                            <p style="text-align:center;">Aucun Résultat</p>`;
+                    } else {
+                        data.data.notes.forEach(note => {
+                            search_container.innerHTML += `
+                                <div id="${note.id_note}" class="histori-conteza" ondblclick='openNote("${note.id_note}")'>
+                                    <div class="history-note">
+                                        <div style="display: flex; flex-direction:row;align-items: center;">
+                                            <div>
+                                                <h4 class="history-icon"><i class="fa-duotone fa-note-sticky"></i></h4>
+                                            </div>
+                                            <div style="display: flex; flex-direction:column;">
+                                                <div class="history-title">&nbsp;<strong>${note.nom_note}</strong></div>
+                                                <div style="display: flex; flex-direction: row;">
+                                                    <div id="history-note-content" class="history-note-content">${note.content_note}</div>
+                                                    <div>....</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="action-note" data-target="context${note.id_note}">
+                                            <strong>.</strong><strong>.</strong><strong>.</strong>
+                                        </div>
+                                    </div><br>
+                                    <div class="context-action" id="context${note.id_note}" hidden>
+                                        <ul>
+                                            <li class="act" onclick='openNote("${note.id_note}")'>Ouvrir</li>
+                                            <li class="act">Ouvrir le dossiers</li>
+                                            <li class="act">Info</li>
+                                        </ul>
+                                    </div>
+                                </div>`;
+                        });
+                    }
+                    
+                    if (data.data.folders) {
+                        search_container.innerHTML += "<h3>Dossiers trouvés:</h3>";
+                        if (data.data.folders.length <= 0) {
+                            search_container.innerHTML += `
+                                <p style="text-align:center;">Aucun Résultat</p>`;
+                        } else {
+                            data.data.folders.forEach(folder => {
+                                search_container.innerHTML += `
+                                    <div id="${folder.id_folder}" class="histori-conteza" ondblclick='openFolder("${folder.id_folder}")'>
+                                        <div class="history-note">
+                                            <div style="display: flex; flex-direction:row;align-items: center;">
+                                                <div>
+                                                    <h4 class="history-icon"><i class="fa-duotone fa-folder"></i></h4>
+                                                </div>
+                                                <div style="display: flex; flex-direction:column;">
+                                                    <div class="history-title">&nbsp;<strong>${folder.nom_folder}</strong></div>
+                                                </div>
+                                            </div>
+                                            <div class="action-note" data-target="context${folder.id_folder}">
+                                                <strong>.</strong><strong>.</strong><strong>.</strong>
+                                            </div>
+                                        </div><br>
+                                        <div class="context-action" id="context${folder.id_folder}" hidden>
+                                            <ul>
+                                                <li class="act" onclick='openFolder("${folder.id_folder}")'>Ouvrir</li>
+                                                <li class="act">Info</li>
+                                            </ul>
+                                        </div>
+                                    </div>`;
+                            });
+                        }
+                    }
+                } else if (data.success == false) {
+                    search_container.innerHTML = `
+                        <p style="text-align:center;">Aucun Résultat</p>`;
+                }
+                
+                // Réattacher les event listeners après ajout des éléments
+                document.querySelectorAll('.action-note[data-target]').forEach(note => {
+                    note.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const id = note.getAttribute('data-target');
+                        const menu = document.getElementById(id);
+                        if (!menu) return;
+                        const isHidden = menu.hasAttribute('hidden');
+                        document.querySelectorAll('.context-action').forEach(m => m.setAttribute('hidden', ''));
+                        if (isHidden) {
+                            menu.removeAttribute('hidden');
+                        }
+                    });
+                });
+            })
+            .catch(error => {
+                console.error('Erreur lors de la recherche:', error);
+            });
+    });
+}
+searchAll();
 
 
 

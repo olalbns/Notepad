@@ -280,7 +280,7 @@
                         <div class="title">
                             <div class="newan">
                                 <h1>Mes <span class="pink">notes</span></h1>
-                                <div
+                                <div class="newNoteFolder_div"
                                     style=" display: flex; flex-direction: row; justify-content: space-around; max-height: 45.6px; max-width: 119.49px;">
                                     <button class="newNot-btn" data-target="dropdown-new">
                                         <div>
@@ -308,10 +308,11 @@
                                     <span role="button" tabindex="0" title="Supprimer"><i
                                             style="color:white; font-size:19px;" class="fa-duotone fa-trash"></i></span>
                                 </div>
-                                <form id="jj" class="search-form" action="" method="get">
-                                    <div class="search-div" style="background-color:whitesmoke; border-radius:12px; padding:4px;"><input
-                                            type="search" name="search" id="search" placeholder="Rechercher"><i
-                                            class="fa-duotone fa-search manip-2"></i></div>
+                                <form id="searchBar" class="search-form"  action="" method="get">
+                                    <div class="search-div">
+                                        <input type="search" name="search" id="search" placeholder="Rechercher">
+                                        <i class="fa-duotone fa-search manip-2" id="search-btn"></i>
+                                    </div>
                                 </form>
                                 <div class="alignements">
                                     <div role="button" tabindex="0" style="color:  white; font-size: 19px;"
@@ -327,6 +328,13 @@
                                     <div class="profile" role="button" tabindex="0"><i class="fa-duotone fa-user-circle"></i></div>
                                 </div>
                             </div>
+                        </div>
+                        <div id="Sec-searchResult" class="Sec-searchResult" hidden><br>
+                            <div class="research-info">
+                                <div class="closeIco" style="display: inline;" onclick="affiNote(); document.querySelector('.Sec-searchResult').setAttribute('hidden', '')"><i class="fa-duotone fa-xmark"></i></div>
+                                Résultats de recherche pour <span id="research-query"></span>
+                            </div><br>
+                            <div class="research-container"></div>
                         </div>
                         <div class="SecPreviewNote" id="SecPreviewNote" hidden>
                             <div class="preview-container">

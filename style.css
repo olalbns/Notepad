@@ -307,7 +307,7 @@ main {
 }
 
 .search-div {
-    padding: 12px;
+    padding: 4px;
     max-height: 45.6px;
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.56);
@@ -317,6 +317,16 @@ main {
     -webkit-backdrop-filter: blur(12px);
     transition: all 0.3s ease;
 
+}
+
+.search-div i{
+    padding: 10px;
+}
+
+.search-div i:hover {
+    background-color: rgba(0, 0, 0, 0.13);
+    cursor: pointer;
+    border-radius: 10px;
 }
 
 .newNot-btn div {
@@ -447,7 +457,7 @@ main {
     flex-direction: column;
     align-items: start;
     margin: 0;
-    padding: 2px;
+    /* padding: 2px; */
 }
 
 .search-form {
@@ -645,9 +655,9 @@ main {
         display: none;
     } */
 
-.tools{
-    display: none;
-}
+    .tools {
+        display: none;
+    }
 
     .newNot-btn div span:nth-child(2) {
         display: none;
@@ -655,6 +665,10 @@ main {
 
     #search {
         display: none;
+        position: fixed;
+        z-index: 999;
+        top: 45px;
+        right: -160px;
     }
 
     h1 {
@@ -724,6 +738,34 @@ main {
         .sidelinkname {
             display: none;
         }
+    }
+
+    .dropdown-new {
+        bottom: 130px;
+        top: auto;
+        background-color: rgba(0, 0, 0, 0.13);
+        padding: 2px;
+        right: 50px;
+
+        border: 1px solid rgba(255, 255, 255, 0.56);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.25));
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: all 0.3s ease;
+        background-color: rgba(0, 0, 0, 0.13);
+    }
+
+    .newNot-btn {
+        position: absolute;
+        bottom: 0px;
+        right: 10px;
+    }
+
+    .newNoteFolder_div {
+        position: absolute;
+        bottom: 70px;
+        right: 10px;
     }
 }
 
@@ -939,7 +981,8 @@ div#history-note-content::-webkit-scrollbar {
 
 #Sec-folder,
 .Sec-OpenNote,
-.folders-container {
+.folders-container,
+.research-container {
     background-color: white;
     width: 95%;
     margin: auto;
